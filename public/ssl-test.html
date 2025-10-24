@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTPS Test Sayfası</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .success-box {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .icon {
+            font-size: 64px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        .info strong {
+            color: #FF6B00;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: #4CAF50;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        ul {
+            text-align: left;
+            margin: 15px 0;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .protocol {
+            font-weight: bold;
+            color: #4CAF50;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-box">
+        <div class="icon">✅</div>
+        <h1>HTTPS Başarılı!</h1>
+        
+        <div class="info">
+            <strong>Bağlantı Bilgileri:</strong><br>
+            Protokol: <span class="protocol" id="protocol"></span><br>
+            URL: <span id="url"></span><br>
+            Cihaz: <span id="device"></span>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Güvenlik Uyarısını Geçtiniz mi?</strong><br>
+            Bu sayfayı görüyorsanız, HTTPS çalışıyor demektir!<br>
+            Artık WebGazer kamera erişimi isteyebilir.
+        </div>
+
+        <h2>Tarayıcı Bilgileri</h2>
+        <ul>
+            <li><strong>User Agent:</strong> <span id="userAgent"></span></li>
+            <li><strong>Platform:</strong> <span id="platform"></span></li>
+            <li><strong>Ekran:</strong> <span id="screen"></span></li>
+        </ul>
+
+        <h2>Kamera Testi</h2>
+        <button onclick="testCamera()" class="btn" style="background: #2196F3;">
+            📸 Kamera Erişimini Test Et
+        </button>
+        <div id="cameraResult"></div>
+
+        <hr style="margin: 30px 0; border: 1px solid #ddd;">
+
+        <a href="/dashboard" class="btn">🏦 Dashboard'a Git</a>
+        <a href="/transfer" class="btn" style="background: #FF6B00;">💸 Para Transfer'e Git</a>
+    </div>
+
+    <script>
+        // URL ve protokol bilgisi
+        document.getElementById('protocol').textContent = window.location.protocol;
+        document.getElementById('url').textContent = window.location.href;
+        
+        // Cihaz bilgisi
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        document.getElementById('device').textContent = isMobile ? '📱 Mobil Cihaz' : '💻 Desktop';
+        
+        // Tarayıcı bilgileri
+        document.getElementById('userAgent').textContent = navigator.userAgent.substring(0, 100) + '...';
+        document.getElementById('platform').textContent = navigator.platform;
+        document.getElementById('screen').textContent = `${window.screen.width}x${window.screen.height}`;
+        
+        // HTTPS kontrolü
+        if (window.location.protocol !== 'https:') {
+            document.querySelector('.success-box').innerHTML = `
+                <div class="icon">❌</div>
+                <h1 style="color: #F44336;">HTTP Kullanıyorsunuz!</h1>
+                <div class="warning">
+                    <strong>WebGazer HTTPS gerektirir!</strong><br>
+                    Lütfen URL'yi <strong>https://</strong> ile başlatın.
+                </div>
+                <a href="https://${window.location.host}${window.location.pathname}" class="btn">
+                    🔒 HTTPS'e Geç
+                </a>
+            `;
+        }
+        
+        // Kamera testi
+        async function testCamera() {
+            const resultDiv = document.getElementById('cameraResult');
+            resultDiv.innerHTML = '<p style="margin-top: 15px;">Kamera izni bekleniyor...</p>';
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                
+                // İzin alındı
+                resultDiv.innerHTML = `
+                    <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-top: 15px; border: 2px solid #28a745;">
+                        <strong>✅ Kamera İzni Verildi!</strong><br>
+                        WebGazer çalışabilir.<br>
+                        <small>Video stream başarıyla oluşturuldu.</small>
+                    </div>
+                `;
+                
+                // Stream'i kapat
+                stream.getTracks().forEach(track => track.stop());
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-top: 15px; border: 2px solid #f44336;">
+                        <strong>❌ Kamera İzni Reddedildi</strong><br>
+                        Hata: ${error.message}<br><br>
+                        <strong>Çözüm:</strong><br>
+                        1. HTTPS kullandığınızdan emin olun<br>
+                        2. Tarayıcı ayarlarından kamera iznini kontrol edin<br>
+                        3. Sayfayı yenileyin ve tekrar deneyin
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
+

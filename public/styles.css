@@ -1001,6 +1001,64 @@ body {
         bottom: 10px !important;
         right: 10px !important;
     }
+    
+    /* Mobilde sanal imleci büyüt */
+    .virtual-cursor {
+        width: 80px !important;
+        height: 80px !important;
+    }
+    
+    .cursor-dot {
+        width: 16px !important;
+        height: 16px !important;
+    }
+    
+    .cursor-ring {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    /* Mobilde butonları büyüt */
+    .action-btn {
+        min-height: 100px;
+        padding: 30px 20px;
+        font-size: 16px;
+    }
+    
+    .action-icon {
+        width: 64px !important;
+        height: 64px !important;
+    }
+    
+    .action-icon svg {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    
+    /* Form butonları */
+    .btn {
+        min-height: 56px;
+        font-size: 16px;
+        padding: 16px 24px;
+    }
+    
+    /* Transfer butonları */
+    .tab-btn {
+        min-height: 48px;
+        font-size: 15px;
+    }
+    
+    /* Gaze confirmation butonu */
+    .gaze-confirm-btn {
+        width: 140px !important;
+        height: 140px !important;
+    }
+    
+    /* Touch-friendly spacing */
+    .transaction-item {
+        padding: 20px 16px;
+        margin-bottom: 12px;
+    }
 }
 
 /* Virtual Cursor Styles */

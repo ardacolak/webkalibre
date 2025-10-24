@@ -3,16 +3,62 @@ if (!sessionStorage.getItem('isLoggedIn')) {
     window.location.href = '/';
 }
 
+// Mobil cihaz kontrolü (EN BAŞTA TANIMLANMALI)
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
 // Virtual Cursor Configuration
 let virtualCursor = null;
 let currentGazeX = 0;
 let currentGazeY = 0;
 let hoveredElement = null;
 let hoverStartTime = 0;
-const CLICK_DURATION = 1500; // 1.5 seconds to trigger click
+let CLICK_DURATION = isMobile ? 2500 : 1500; // Mobilde daha uzun
 let isHovering = false;
 let clickEnabled = true;
 let webgazerInitialized = false;
+
+// Smoothing configuration for stable tracking (mobilde daha fazla)
+let gazeHistory = [];
+const SMOOTHING_WINDOW = isMobile ? 15 : 10;
+const SMOOTHING_FACTOR = isMobile ? 0.2 : 0.3;
+let smoothedX = 0;
+let smoothedY = 0;
+const UPDATE_THROTTLE = isMobile ? 100 : 30;
+let lastUpdateTime = 0;
+
+// Tıklama süresi (mobilde daha uzun)
+const CLICK_DURATION_ADJUSTED = isMobile ? 2500 : 1500;
+
+if (isMobile) {
+    console.log('📱 Mobil mod aktif - Dashboard optimizasyonları');
+    console.log(`   Smoothing: ${SMOOTHING_WINDOW}, FPS: ${1000/UPDATE_THROTTLE}`);
+}
+
+// Apply smoothing filter to reduce jitter
+function applySmoothingFilter(x, y) {
+    gazeHistory.push({ x: x, y: y });
+    
+    if (gazeHistory.length > SMOOTHING_WINDOW) {
+        gazeHistory.shift();
+    }
+    
+    let avgX = 0;
+    let avgY = 0;
+    for (let i = 0; i < gazeHistory.length; i++) {
+        avgX += gazeHistory[i].x;
+        avgY += gazeHistory[i].y;
+    }
+    avgX /= gazeHistory.length;
+    avgY /= gazeHistory.length;
+    
+    smoothedX = smoothedX === 0 ? avgX : (smoothedX * (1 - SMOOTHING_FACTOR) + avgX * SMOOTHING_FACTOR);
+    smoothedY = smoothedY === 0 ? avgY : (smoothedY * (1 - SMOOTHING_FACTOR) + avgY * SMOOTHING_FACTOR);
+    
+    return {
+        x: Math.round(smoothedX),
+        y: Math.round(smoothedY)
+    };
+}
 
 // Initialize WebGazer on Dashboard
 function initWebGazerDashboard() {
@@ -25,8 +71,18 @@ function initWebGazerDashboard() {
         .setGazeListener(function(data, elapsedTime) {
             if (data == null) return;
             
-            updateVirtualCursor(data.x, data.y);
-            checkGazeHover(data.x, data.y);
+            // Throttle updates
+            const now = Date.now();
+            if (now - lastUpdateTime < UPDATE_THROTTLE) {
+                return;
+            }
+            lastUpdateTime = now;
+            
+            // Apply smoothing
+            const smoothed = applySmoothingFilter(data.x, data.y);
+            
+            updateVirtualCursor(smoothed.x, smoothed.y);
+            checkGazeHover(smoothed.x, smoothed.y);
         })
         .begin()
         .then(() => {
@@ -43,6 +99,16 @@ function initWebGazerDashboard() {
     
     webgazer.showPredictionPoints(false);
     webgazer.applyKalmanFilter(true);
+    webgazer.params.showVideo = !isMobile; // Mobilde gizle
+    webgazer.params.showFaceOverlay = false;
+    webgazer.params.showFaceFeedbackBox = false;
+    
+    // Mobilde düşük çözünürlük
+    if (isMobile) {
+        webgazer.params.videoWidth = 320;
+        webgazer.params.videoHeight = 240;
+    }
+    
     window.saveDataAcrossSessions = true;
 }
 

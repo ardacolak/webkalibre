@@ -195,6 +195,33 @@
         let isHovering = false;
         let clickEnabled = true;
         let webgazerInitialized = false;
+        
+        // Smoothing configuration
+        let gazeHistory = [];
+        const SMOOTHING_WINDOW = 10;
+        const SMOOTHING_FACTOR = 0.3;
+        let smoothedX = 0;
+        let smoothedY = 0;
+        const UPDATE_THROTTLE = 50;
+        let lastUpdateTime = 0;
+        
+        // Smoothing function
+        function applySmoothingFilter(x, y) {
+            gazeHistory.push({ x: x, y: y });
+            if (gazeHistory.length > SMOOTHING_WINDOW) {
+                gazeHistory.shift();
+            }
+            let avgX = 0, avgY = 0;
+            for (let i = 0; i < gazeHistory.length; i++) {
+                avgX += gazeHistory[i].x;
+                avgY += gazeHistory[i].y;
+            }
+            avgX /= gazeHistory.length;
+            avgY /= gazeHistory.length;
+            smoothedX = smoothedX === 0 ? avgX : (smoothedX * (1 - SMOOTHING_FACTOR) + avgX * SMOOTHING_FACTOR);
+            smoothedY = smoothedY === 0 ? avgY : (smoothedY * (1 - SMOOTHING_FACTOR) + avgY * SMOOTHING_FACTOR);
+            return { x: Math.round(smoothedX), y: Math.round(smoothedY) };
+        }
 
         function addLog(message) {
             const logConsole = document.getElementById('logConsole');
@@ -227,11 +254,18 @@
                 .setGazeListener(function(data, elapsedTime) {
                     if (data == null) return;
                     
-                    updateVirtualCursor(data.x, data.y);
-                    checkGazeHover(data.x, data.y);
+                    // Throttle and smooth
+                    const now = Date.now();
+                    if (now - lastUpdateTime < UPDATE_THROTTLE) return;
+                    lastUpdateTime = now;
+                    
+                    const smoothed = applySmoothingFilter(data.x, data.y);
+                    
+                    updateVirtualCursor(smoothed.x, smoothed.y);
+                    checkGazeHover(smoothed.x, smoothed.y);
                     
                     document.getElementById('cursorPos').textContent = 
-                        `X: ${Math.round(data.x)}, Y: ${Math.round(data.y)}`;
+                        `X: ${smoothed.x}, Y: ${smoothed.y}`;
                 })
                 .begin()
                 .then(() => {
@@ -246,6 +280,9 @@
             
             webgazer.showPredictionPoints(false);
             webgazer.applyKalmanFilter(true);
+            webgazer.params.showVideo = true;
+            webgazer.params.showFaceOverlay = false;
+            webgazer.params.showFaceFeedbackBox = false;
         });
 
         // Click duration slider
