@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlternatifBank - Para Transfer</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://webgazer.cs.brown.edu/webgazer.js" type="text/javascript"></script>
+</head>
+<body>
+    <div class="transfer-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <button class="back-btn" onclick="goBack()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                    </svg>
+                </button>
+                <h1>Para Transfer</h1>
+                <div class="user-info">
+                    <button class="logout-btn" onclick="logout()">Çıkış</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- WebGazer Status -->
+        <div id="webgazer-status" class="webgazer-status">
+            <span class="status-dot"></span>
+            <span id="status-text">Göz takibi başlatılıyor...</span>
+            <button id="calibrate-btn" class="calibrate-btn" style="display: none;">Kalibre Et</button>
+        </div>
+
+        <!-- Main Transfer Form -->
+        <main class="transfer-main">
+            <div class="transfer-form-container">
+                <form id="transferForm" class="transfer-form">
+                    <!-- From Account -->
+                    <div class="form-section">
+                        <label class="form-label">Gönderen Hesap</label>
+                        <select class="form-select" id="fromAccount" required>
+                            <option value="tr1">TR33 0006 2000 1234 5678 9012 34 - ₺45,832.50</option>
+                            <option value="usd1">TR33 0006 2000 9876 5432 1098 76 - $2,450.00</option>
+                        </select>
+                    </div>
+
+                    <!-- Transfer Type -->
+                    <div class="form-section">
+                        <label class="form-label">Transfer Tipi</label>
+                        <div class="transfer-type-tabs">
+                            <button type="button" class="tab-btn active" data-type="iban" onclick="selectTransferType('iban')">
+                                IBAN ile
+                            </button>
+                            <button type="button" class="tab-btn" data-type="phone" onclick="selectTransferType('phone')">
+                                Telefon ile
+                            </button>
+                            <button type="button" class="tab-btn" data-type="saved" onclick="selectTransferType('saved')">
+                                Kayıtlı Alıcı
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Recipient Information -->
+                    <div class="form-section" id="ibanSection">
+                        <label class="form-label" for="recipientIban">Alıcı IBAN</label>
+                        <input type="text" class="form-input" id="recipientIban" 
+                               placeholder="TR00 0000 0000 0000 0000 0000 00" 
+                               maxlength="32" required>
+                    </div>
+
+                    <div class="form-section" id="phoneSection" style="display: none;">
+                        <label class="form-label" for="recipientPhone">Alıcı Telefon Numarası</label>
+                        <input type="tel" class="form-input" id="recipientPhone" 
+                               placeholder="5XX XXX XX XX">
+                    </div>
+
+                    <div class="form-section" id="savedSection" style="display: none;">
+                        <label class="form-label" for="savedRecipient">Kayıtlı Alıcı Seçin</label>
+                        <select class="form-select" id="savedRecipient">
+                            <option value="">Seçiniz</option>
+                            <option value="1">Mehmet Demir - TR12 3456 7890 1234 5678 9012 34</option>
+                            <option value="2">Ayşe Yıldız - TR98 7654 3210 9876 5432 1098 76</option>
+                            <option value="3">Fatma Kaya - TR45 6789 0123 4567 8901 2345 67</option>
+                        </select>
+                    </div>
+
+                    <div class="form-section">
+                        <label class="form-label" for="recipientName">Alıcı Adı Soyadı</label>
+                        <input type="text" class="form-input" id="recipientName" 
+                               placeholder="Alıcı adı soyadı" required>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="form-section">
+                        <label class="form-label" for="amount">Tutar</label>
+                        <div class="amount-input-container">
+                            <span class="currency-symbol">₺</span>
+                            <input type="number" class="form-input amount-input" id="amount" 
+                                   placeholder="0.00" step="0.01" min="0.01" required>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-section">
+                        <label class="form-label" for="description">Açıklama (Opsiyonel)</label>
+                        <textarea class="form-textarea" id="description" 
+                                  placeholder="Transfer açıklaması" rows="3"></textarea>
+                    </div>
+
+                    <!-- Summary Card -->
+                    <div class="summary-card">
+                        <h3>Transfer Özeti</h3>
+                        <div class="summary-row">
+                            <span>Gönderilecek Tutar:</span>
+                            <span id="summaryAmount" class="summary-value">₺0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Transfer Ücreti:</span>
+                            <span id="summaryFee" class="summary-value">₺0.00</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Toplam:</span>
+                            <span id="summaryTotal" class="summary-value">₺0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary btn-large" id="submitBtn">
+                        Transferi Onayla
+                    </button>
+
+                    <!-- Gaze Confirmation Section (hidden initially) -->
+                    <div id="gazeConfirmation" class="gaze-confirmation" style="display: none;">
+                        <h3>Göz Takibi ile Onay</h3>
+                        <p>Transferi onaylamak için aşağıdaki butona 3 saniye bakın</p>
+                        <div class="gaze-button-container">
+                            <button type="button" id="gazeConfirmBtn" class="gaze-confirm-btn">
+                                <span class="gaze-text">Buraya Bakın</span>
+                                <svg class="gaze-progress" width="120" height="120" viewBox="0 0 120 120">
+                                    <circle class="gaze-progress-bg" cx="60" cy="60" r="54"/>
+                                    <circle class="gaze-progress-bar" cx="60" cy="60" r="54" id="gazeProgressCircle"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="gaze-status" id="gazeStatus">Hazırlanıyor...</p>
+                    </div>
+                </form>
+            </div>
+
+    <!-- Gaze Heatmap Overlay -->
+    <div id="gazeHeatmap" class="gaze-heatmap"></div>
+    
+    <!-- Virtual Cursor for Eye Tracking -->
+    <div id="virtualCursor" class="virtual-cursor" style="display: none;">
+        <div class="cursor-dot"></div>
+        <div class="cursor-ring"></div>
+        <svg class="cursor-progress" width="60" height="60" viewBox="0 0 60 60">
+            <circle class="cursor-progress-bg" cx="30" cy="30" r="26"/>
+            <circle class="cursor-progress-bar" cx="30" cy="30" r="26" id="cursorProgressCircle"/>
+        </svg>
+    </div>
+        </main>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal" style="display: none;">
+        <div class="modal-content success">
+            <div class="modal-icon">
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="#4CAF50">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+            </div>
+            <h2>Transfer Başarılı!</h2>
+            <p>Para transferiniz başarıyla gerçekleştirildi.</p>
+            <div class="modal-details">
+                <div class="detail-row">
+                    <span>Alıcı:</span>
+                    <span id="modalRecipient"></span>
+                </div>
+                <div class="detail-row">
+                    <span>Tutar:</span>
+                    <span id="modalAmount"></span>
+                </div>
+                <div class="detail-row">
+                    <span>İşlem No:</span>
+                    <span id="modalTxId"></span>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="goToDashboard()">Ana Sayfaya Dön</button>
+        </div>
+    </div>
+
+    <script src="transfer.js"></script>
+</body>
+</html>
+
