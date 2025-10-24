@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kamera Debug</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 { color: #333; margin-bottom: 20px; font-size: 24px; }
+        .info-box {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .info-box strong { color: #FF6B00; }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: #4CAF50; color: white; }
+        .btn-primary:hover { background: #45a049; }
+        .btn-secondary { background: #2196F3; color: white; }
+        .btn-secondary:hover { background: #0b7dda; }
+        .log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .log-entry { margin: 5px 0; }
+        .error { color: #ff4444; }
+        .success { color: #44ff44; }
+        .warning { color: #ffaa00; }
+        video { width: 100%; border-radius: 8px; margin: 10px 0; }
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.warning { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📸 Kamera Debug Ekranı</h1>
+        
+        <div class="info-box">
+            <strong>Cihaz:</strong> <span id="device"></span><br>
+            <strong>Tarayıcı:</strong> <span id="browser"></span><br>
+            <strong>HTTPS:</strong> <span id="https"></span><br>
+            <strong>Ekran:</strong> <span id="screen"></span>
+        </div>
+
+        <div id="status"></div>
+
+        <button class="btn btn-primary" onclick="testBasicCamera()">
+            1️⃣ Basit Kamera Testi
+        </button>
+
+        <button class="btn btn-secondary" onclick="testDetailedCamera()">
+            2️⃣ Detaylı Kamera Testi
+        </button>
+
+        <button class="btn btn-secondary" onclick="listDevices()">
+            3️⃣ Kamera Listesini Göster
+        </button>
+
+        <button class="btn btn-secondary" onclick="testFrontCamera()">
+            4️⃣ Ön Kamera (Facingmode: user)
+        </button>
+
+        <div id="videoContainer"></div>
+
+        <h3>📋 Log:</h3>
+        <div class="log" id="logContainer">
+            <div class="log-entry">Hazır. Test butonlarına basın...</div>
+        </div>
+
+        <button class="btn btn-primary" style="background: #FF6B00; margin-top: 20px;" onclick="location.href='/dashboard'">
+            ← Dashboard'a Dön
+        </button>
+    </div>
+
+    <script>
+        // Cihaz bilgileri
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isAndroid = /Android/.test(navigator.userAgent);
+
+        document.getElementById('device').textContent = isMobile ? (isIOS ? '📱 iOS' : '📱 Android') : '💻 Desktop';
+        document.getElementById('browser').textContent = getBrowserName();
+        document.getElementById('https').textContent = window.location.protocol === 'https:' ? '✅ Aktif' : '❌ Kapalı';
+        document.getElementById('screen').textContent = `${window.screen.width}x${window.screen.height}`;
+
+        function getBrowserName() {
+            const ua = navigator.userAgent;
+            if (ua.includes('Chrome')) return 'Chrome';
+            if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+            if (ua.includes('Firefox')) return 'Firefox';
+            if (ua.includes('Edge')) return 'Edge';
+            return 'Unknown';
+        }
+
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const time = new Date().toLocaleTimeString();
+            entry.textContent = `[${time}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.textContent = message;
+        }
+
+        // 1. Basit Kamera Testi
+        async function testBasicCamera() {
+            addLog('Basit kamera testi başlıyor...');
+            showStatus('Kamera izni bekleniyor...', 'warning');
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                
+                addLog('✅ Kamera erişimi başarılı!', 'success');
+                showStatus('✅ Kamera çalışıyor!', 'success');
+                
+                // Video göster
+                showVideo(stream);
+                
+                // Stream bilgisi
+                const tracks = stream.getVideoTracks();
+                addLog(`Video track: ${tracks[0].label}`);
+                addLog(`Ayarlar: ${JSON.stringify(tracks[0].getSettings())}`);
+                
+            } catch (error) {
+                addLog(`❌ HATA: ${error.name} - ${error.message}`, 'error');
+                showStatus(`❌ Hata: ${error.message}`, 'error');
+                
+                // Detaylı hata analizi
+                analyzeError(error);
+            }
+        }
+
+        // 2. Detaylı Kamera Testi
+        async function testDetailedCamera() {
+            addLog('Detaylı kamera testi başlıyor...');
+            
+            const constraints = {
+                video: {
+                    width: { ideal: 320 },
+                    height: { ideal: 240 },
+                    facingMode: 'user'
+                }
+            };
+            
+            addLog(`Constraints: ${JSON.stringify(constraints)}`);
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                addLog('✅ Detaylı test başarılı!', 'success');
+                showStatus('✅ Detaylı test başarılı!', 'success');
+                showVideo(stream);
+            } catch (error) {
+                addLog(`❌ HATA: ${error.name} - ${error.message}`, 'error');
+                showStatus(`❌ Hata: ${error.message}`, 'error');
+                analyzeError(error);
+            }
+        }
+
+        // 3. Cihaz Listesi
+        async function listDevices() {
+            addLog('Kamera cihazları listeleniyor...');
+            
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                
+                addLog(`Toplam ${videoDevices.length} kamera bulundu:`, 'success');
+                
+                videoDevices.forEach((device, index) => {
+                    addLog(`${index + 1}. ${device.label || 'Kamera ' + (index + 1)} (ID: ${device.deviceId.substring(0, 20)}...)`);
+                });
+                
+                if (videoDevices.length === 0) {
+                    addLog('⚠️ Hiç kamera bulunamadı!', 'warning');
+                    showStatus('⚠️ Kamera bulunamadı', 'warning');
+                }
+                
+            } catch (error) {
+                addLog(`❌ Cihaz listesi alınamadı: ${error.message}`, 'error');
+            }
+        }
+
+        // 4. Ön Kamera Testi
+        async function testFrontCamera() {
+            addLog('Ön kamera testi (mobil için)...');
+            
+            const constraints = {
+                video: {
+                    facingMode: { exact: 'user' },
+                    width: { ideal: 320 },
+                    height: { ideal: 240 }
+                }
+            };
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                addLog('✅ Ön kamera başarılı!', 'success');
+                showStatus('✅ Ön kamera çalışıyor!', 'success');
+                showVideo(stream);
+            } catch (error) {
+                addLog(`❌ Ön kamera hatası: ${error.message}`, 'error');
+                addLog('Alternatif deneniyor...', 'warning');
+                
+                // facingMode olmadan dene
+                try {
+                    const stream2 = await navigator.mediaDevices.getUserMedia({ 
+                        video: { width: 320, height: 240 }
+                    });
+                    addLog('✅ Varsayılan kamera ile başarılı!', 'success');
+                    showStatus('✅ Varsayılan kamera çalışıyor!', 'success');
+                    showVideo(stream2);
+                } catch (error2) {
+                    addLog(`❌ İkinci deneme de başarısız: ${error2.message}`, 'error');
+                    analyzeError(error2);
+                }
+            }
+        }
+
+        // Video göster
+        function showVideo(stream) {
+            const container = document.getElementById('videoContainer');
+            container.innerHTML = '<h3>📹 Canlı Video:</h3>';
+            
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.autoplay = true;
+            video.playsInline = true; // iOS için önemli!
+            
+            container.appendChild(video);
+            
+            // 10 saniye sonra durdur
+            setTimeout(() => {
+                stream.getTracks().forEach(track => track.stop());
+                addLog('Video stream 10 saniye sonra durduruldu');
+            }, 10000);
+        }
+
+        // Hata analizi
+        function analyzeError(error) {
+            addLog('--- HATA ANALİZİ ---', 'warning');
+            
+            if (error.name === 'NotAllowedError') {
+                addLog('⚠️ Kamera izni reddedildi!', 'error');
+                addLog('Çözüm: Tarayıcı ayarlarından kamera iznini kontrol edin');
+                showStatus('❌ Kamera izni reddedildi', 'error');
+            } 
+            else if (error.name === 'NotFoundError') {
+                addLog('⚠️ Kamera bulunamadı!', 'error');
+                addLog('Çözüm: Cihazda kamera olduğundan emin olun');
+                showStatus('❌ Kamera bulunamadı', 'error');
+            }
+            else if (error.name === 'NotReadableError') {
+                addLog('⚠️ Kamera kullanımda!', 'error');
+                addLog('Çözüm: Başka uygulama kamerayı kullanıyor olabilir');
+                showStatus('❌ Kamera kullanımda', 'error');
+            }
+            else if (error.name === 'OverconstrainedError') {
+                addLog('⚠️ Kamera istenen özellikleri desteklemiyor!', 'error');
+                addLog('Çözüm: Daha basit constraint kullanın');
+                showStatus('❌ Kamera özellikleri uyumsuz', 'error');
+            }
+            else if (error.name === 'SecurityError') {
+                addLog('⚠️ Güvenlik hatası!', 'error');
+                addLog('Çözüm: HTTPS kullanıldığından emin olun');
+                showStatus('❌ Güvenlik hatası (HTTPS gerekli)', 'error');
+            }
+            else {
+                addLog(`⚠️ Bilinmeyen hata: ${error.name}`, 'error');
+                showStatus(`❌ ${error.name}`, 'error');
+            }
+            
+            addLog(`Tam hata: ${error.toString()}`);
+        }
+
+        // Sayfa yüklendiğinde otomatik kontrol
+        window.onload = function() {
+            addLog('Sayfa yüklendi');
+            addLog(`navigator.mediaDevices: ${navigator.mediaDevices ? '✅' : '❌'}`);
+            addLog(`getUserMedia: ${navigator.mediaDevices?.getUserMedia ? '✅' : '❌'}`);
+            
+            if (window.location.protocol !== 'https:') {
+                addLog('⚠️ UYARI: HTTPS kullanılmıyor!', 'warning');
+                showStatus('⚠️ HTTPS gerekli!', 'warning');
+            }
+        };
+    </script>
+</body>
+</html>
+

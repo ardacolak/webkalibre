@@ -103,10 +103,12 @@ function initWebGazerDashboard() {
     webgazer.params.showFaceOverlay = false;
     webgazer.params.showFaceFeedbackBox = false;
     
-    // Mobilde düşük çözünürlük
+    // Mobilde düşük çözünürlük VE ÖN KAMERA
     if (isMobile) {
         webgazer.params.videoWidth = 320;
         webgazer.params.videoHeight = 240;
+        webgazer.params.facingMode = 'user'; // ÖN KAMERA (selfie) - göz takibi için zorunlu!
+        console.log('📸 ÖN KAMERA aktif (facingMode: user)');
     }
     
     window.saveDataAcrossSessions = true;

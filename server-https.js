@@ -42,6 +42,10 @@ app.get('/ssl-test', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'ssl-test.html'));
 });
 
+app.get('/camera-debug', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'camera-debug.html'));
+});
+
 // HTTPS sunucu başlat
 https.createServer(options, app).listen(PORT, '0.0.0.0', () => {
   console.log('');
