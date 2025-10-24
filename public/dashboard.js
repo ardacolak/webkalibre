@@ -12,7 +12,7 @@ let currentGazeX = 0;
 let currentGazeY = 0;
 let hoveredElement = null;
 let hoverStartTime = 0;
-let CLICK_DURATION = isMobile ? 2500 : 1500; // Mobilde daha uzun
+let CLICK_DURATION = 1000; // 1 second - HIZLI MOD ⚡
 let isHovering = false;
 let clickEnabled = true;
 let webgazerInitialized = false;
@@ -26,8 +26,8 @@ let smoothedY = 0;
 const UPDATE_THROTTLE = isMobile ? 100 : 30;
 let lastUpdateTime = 0;
 
-// Tıklama süresi (mobilde daha uzun)
-const CLICK_DURATION_ADJUSTED = isMobile ? 2500 : 1500;
+// Tıklama süresi - TÜM CİHAZLARDA 1 SANİYE ⚡
+const CLICK_DURATION_ADJUSTED = 1000;
 
 if (isMobile) {
     console.log('📱 Mobil mod aktif - Dashboard optimizasyonları');
@@ -141,7 +141,11 @@ function checkGazeHover(x, y) {
         element.onclick !== null ||
         element.classList.contains('action-btn') ||
         element.classList.contains('btn') ||
-        element.classList.contains('logout-btn')
+        element.classList.contains('logout-btn') ||
+        element.classList.contains('btn-sm') ||
+        element.classList.contains('quick-card-close') ||
+        element.classList.contains('btn-primary') ||
+        element.classList.contains('btn-secondary')
     );
     
     if (isClickable && element !== hoveredElement) {
@@ -199,7 +203,7 @@ function performGazeClick() {
         border-radius: 50%;
         transform: translate(-50%, -50%);
         pointer-events: none;
-        z-index: 10000;
+        z-index: 100001;
         animation: clickPulse 0.5s ease;
     `;
     document.body.appendChild(ripple);

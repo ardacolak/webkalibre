@@ -8,7 +8,7 @@ let webgazerInitialized = false;
 let gazeData = [];
 let isLookingAtButton = false;
 let lookStartTime = 0;
-const LOOK_DURATION = 3000; // 3 seconds
+const LOOK_DURATION = 1000; // 1 second - HIZLI MOD ⚡
 
 // Virtual Cursor Configuration
 let virtualCursor = null;
@@ -16,7 +16,7 @@ let currentGazeX = 0;
 let currentGazeY = 0;
 let hoveredElement = null;
 let hoverStartTime = 0;
-let CLICK_DURATION = 1500; // 1.5 seconds to trigger click (will be adjusted for mobile)
+let CLICK_DURATION = 1000; // 1 second - HIZLI MOD ⚡
 let isHovering = false;
 let clickEnabled = true;
 
@@ -32,8 +32,8 @@ let smoothedY = 0;
 const UPDATE_THROTTLE = isMobile ? 100 : 50; // Mobilde 10 FPS, desktop'ta 20 FPS
 let lastUpdateTime = 0;
 
-// Tıklama süresi (mobilde daha uzun)
-const CLICK_DURATION_ADJUSTED = isMobile ? 2500 : 1500;
+// Tıklama süresi - TÜM CİHAZLARDA 1 SANİYE ⚡
+const CLICK_DURATION_ADJUSTED = 1000;
 
 // Log mobil modu
 if (isMobile) {
@@ -182,7 +182,7 @@ function checkGazeHover(x, y) {
         return;
     }
     
-    // Check if element is clickable
+    // Check if element is clickable (kart butonları dahil!)
     const isClickable = (
         element.tagName === 'BUTTON' ||
         element.tagName === 'A' ||
@@ -190,7 +190,11 @@ function checkGazeHover(x, y) {
         element.classList.contains('action-btn') ||
         element.classList.contains('tab-btn') ||
         element.type === 'submit' ||
-        element.classList.contains('btn')
+        element.classList.contains('btn') ||
+        element.classList.contains('btn-sm') ||
+        element.classList.contains('quick-card-close') ||
+        element.classList.contains('btn-primary') ||
+        element.classList.contains('btn-secondary')
     );
     
     if (isClickable && element !== hoveredElement) {
@@ -247,21 +251,21 @@ function performGazeClick() {
     // Add click animation
     virtualCursor.classList.add('clicking');
     
-    // Visual feedback
-    const ripple = document.createElement('div');
-    ripple.style.cssText = `
-        position: fixed;
-        left: ${currentGazeX}px;
-        top: ${currentGazeY}px;
-        width: 20px;
-        height: 20px;
-        background: rgba(255, 107, 0, 0.5);
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        pointer-events: none;
-        z-index: 10000;
-        animation: clickPulse 0.5s ease;
-    `;
+     // Visual feedback
+     const ripple = document.createElement('div');
+     ripple.style.cssText = `
+         position: fixed;
+         left: ${currentGazeX}px;
+         top: ${currentGazeY}px;
+         width: 20px;
+         height: 20px;
+         background: rgba(255, 107, 0, 0.5);
+         border-radius: 50%;
+         transform: translate(-50%, -50%);
+         pointer-events: none;
+         z-index: 100001;
+         animation: clickPulse 0.5s ease;
+     `;
     document.body.appendChild(ripple);
     
     setTimeout(() => {
@@ -362,22 +366,22 @@ function showCalibrationPoints() {
             smoothedX = 0;
             smoothedY = 0;
             
-            // Show success message
-            const successMsg = document.createElement('div');
-            successMsg.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: #4CAF50;
-                color: white;
-                padding: 20px 40px;
-                border-radius: 12px;
-                font-size: 18px;
-                font-weight: bold;
-                z-index: 10001;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            `;
+             // Show success message
+             const successMsg = document.createElement('div');
+             successMsg.style.cssText = `
+                 position: fixed;
+                 top: 50%;
+                 left: 50%;
+                 transform: translate(-50%, -50%);
+                 background: #4CAF50;
+                 color: white;
+                 padding: 20px 40px;
+                 border-radius: 12px;
+                 font-size: 18px;
+                 font-weight: bold;
+                 z-index: 99999;
+                 box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+             `;
             successMsg.textContent = '✅ Kalibrasyon Tamamlandı!';
             document.body.appendChild(successMsg);
             setTimeout(() => {
@@ -389,37 +393,37 @@ function showCalibrationPoints() {
         const point = points[currentPoint];
         clickCount = 0;
         
-        const dot = document.createElement('div');
-        dot.style.cssText = `
-            position: fixed;
-            left: ${point.x};
-            top: ${point.y};
-            width: 30px;
-            height: 30px;
-            background: #FF6B00;
-            border: 3px solid white;
-            border-radius: 50%;
-            z-index: 10000;
-            transform: translate(-50%, -50%);
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(255, 107, 0, 0.6);
-            animation: pulse 1.5s infinite;
-        `;
+         const dot = document.createElement('div');
+         dot.style.cssText = `
+             position: fixed;
+             left: ${point.x};
+             top: ${point.y};
+             width: 30px;
+             height: 30px;
+             background: #FF6B00;
+             border: 3px solid white;
+             border-radius: 50%;
+             z-index: 99999;
+             transform: translate(-50%, -50%);
+             cursor: pointer;
+             box-shadow: 0 0 20px rgba(255, 107, 0, 0.6);
+             animation: pulse 1.5s infinite;
+         `;
         
-        const counter = document.createElement('div');
-        counter.style.cssText = `
-            position: fixed;
-            left: ${point.x};
-            top: calc(${point.y} + 40px);
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-            z-index: 10001;
-        `;
+         const counter = document.createElement('div');
+         counter.style.cssText = `
+             position: fixed;
+             left: ${point.x};
+             top: calc(${point.y} + 40px);
+             transform: translateX(-50%);
+             background: rgba(0,0,0,0.8);
+             color: white;
+             padding: 4px 12px;
+             border-radius: 12px;
+             font-size: 12px;
+             font-weight: bold;
+             z-index: 99999;
+         `;
         counter.textContent = `${currentPoint + 1}/${points.length} - ${clickCount}/${CLICKS_REQUIRED}`;
         
         document.body.appendChild(dot);
@@ -456,22 +460,22 @@ function showCalibrationPoints() {
         }, 10000);
     }
     
-    // Show instruction
-    const instruction = document.createElement('div');
-    instruction.style.cssText = `
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0,0,0,0.9);
-        color: white;
-        padding: 16px 32px;
-        border-radius: 12px;
-        font-size: 16px;
-        font-weight: bold;
-        z-index: 10002;
-        text-align: center;
-    `;
+     // Show instruction
+     const instruction = document.createElement('div');
+     instruction.style.cssText = `
+         position: fixed;
+         top: 20px;
+         left: 50%;
+         transform: translateX(-50%);
+         background: rgba(0,0,0,0.9);
+         color: white;
+         padding: 16px 32px;
+         border-radius: 12px;
+         font-size: 16px;
+         font-weight: bold;
+         z-index: 99999;
+         text-align: center;
+     `;
     instruction.innerHTML = '🎯 Kalibrasyon<br><small>Her noktaya 5 kez tıklayın</small>';
     document.body.appendChild(instruction);
     
@@ -559,19 +563,7 @@ amountInput?.addEventListener('input', function() {
     document.getElementById('summaryTotal').textContent = `₺${total.toFixed(2)}`;
 });
 
-// Transfer type selection
-function selectTransferType(type) {
-    // Update active tab
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
-    
-    // Show/hide relevant sections
-    document.getElementById('ibanSection').style.display = type === 'iban' ? 'flex' : 'none';
-    document.getElementById('phoneSection').style.display = type === 'phone' ? 'flex' : 'none';
-    document.getElementById('savedSection').style.display = type === 'saved' ? 'flex' : 'none';
-}
+// Transfer type selection - REMOVED (only IBAN supported now)
 
 // Form submission
 transferForm?.addEventListener('submit', function(e) {
@@ -633,23 +625,43 @@ document.getElementById('recipientIban')?.addEventListener('input', function(e) 
     e.target.value = formatted.toUpperCase();
 });
 
-// Phone formatting
-document.getElementById('recipientPhone')?.addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 10) value = value.substr(0, 10);
+// Phone formatting - REMOVED (only IBAN supported now)
+
+// ============================================
+// QUICK TRANSFER CARD FUNCTIONS - KOMPAKT
+// ============================================
+
+function closeQuickTransfer() {
+    const card = document.getElementById('quickTransferCard');
+    if (card) {
+        card.classList.add('hidden');
+        console.log('❌ Quick Transfer kartı gizlendi');
+    }
+}
+
+function confirmQuickTransfer() {
+    console.log('💸 Transfer başlatılıyor: Arda YILMAZ\'a para gönder');
     
-    let formatted = value;
-    if (value.length > 3) {
-        formatted = value.substr(0, 3) + ' ' + value.substr(3);
-    }
-    if (value.length > 6) {
-        formatted = value.substr(0, 3) + ' ' + value.substr(3, 3) + ' ' + value.substr(6);
-    }
-    if (value.length > 8) {
-        formatted = value.substr(0, 3) + ' ' + value.substr(3, 3) + ' ' + value.substr(6, 2) + ' ' + value.substr(8);
-    }
+    // Form alanlarını doldur
+    document.getElementById('recipientIban').value = 'TR12 3456 7890 1234 5678 9012 34';
+    document.getElementById('recipientName').value = 'Arda YILMAZ';
+    document.getElementById('amount').value = '1866.67'; // Ortalama tutar
     
-    e.target.value = formatted;
+    // Kartı gizle
+    closeQuickTransfer();
+    
+    // Form özeti güncelle
+    updateSummary();
+    
+    console.log('✅ Form dolduruldu ve kart gizlendi');
+}
+
+// Sayfa yüklendiğinde kart otomatik görünür (CSS animation ile)
+document.addEventListener('DOMContentLoaded', function() {
+    const card = document.getElementById('quickTransferCard');
+    if (card) {
+        console.log('🎉 Quick Transfer kartı yüklendi');
+    }
 });
 
 // Initialize WebGazer when page loads

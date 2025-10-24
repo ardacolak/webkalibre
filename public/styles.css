@@ -421,7 +421,7 @@ body {
 
 .action-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
 }
 
@@ -1059,6 +1059,11 @@ body {
         padding: 20px 16px;
         margin-bottom: 12px;
     }
+    
+    /* Sticky button için mobilde daha fazla padding */
+    .transfer-form-container {
+        padding-bottom: 100px !important;
+    }
 }
 
 /* Virtual Cursor Styles */
@@ -1067,7 +1072,7 @@ body {
     width: 60px;
     height: 60px;
     pointer-events: none;
-    z-index: 9999;
+    z-index: 100000; /* EN ÜSTTE - Popup'ın da üzerinde! */
     transform: translate(-50%, -50%);
     transition: opacity 0.3s ease;
 }
@@ -1161,5 +1166,261 @@ body {
 
 .virtual-cursor.clicking .cursor-ring {
     animation: clickPulse 0.5s ease;
+}
+
+/* Sticky Submit Button */
+.sticky-button-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(255,255,255,1) 70%, rgba(255,255,255,0.9) 90%, rgba(255,255,255,0) 100%);
+    padding: 20px 20px 30px 20px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.sticky-submit-btn {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    display: block;
+    box-shadow: 0 4px 20px rgba(255, 107, 0, 0.3);
+    animation: pulseButton 2s infinite;
+}
+
+@keyframes pulseButton {
+    0%, 100% {
+        box-shadow: 0 4px 20px rgba(255, 107, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 6px 25px rgba(255, 107, 0, 0.5);
+    }
+}
+
+/* Form container padding to prevent content hiding behind sticky button */
+.transfer-form-container {
+    padding-bottom: 120px;
+}
+
+/* Desktop için maksimum genişlik ayarı */
+@media (min-width: 769px) {
+    .sticky-button-container {
+        max-width: 800px;
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+    }
+}
+
+/* ============================================
+   QUICK TRANSFER CARD - KOMPAKT TASARIM
+   ============================================ */
+
+.quick-transfer-card {
+    background: linear-gradient(135deg, #fff5ec 0%, #ffe8d6 100%);
+    border: 2px solid #ffdfbf;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(255, 107, 0, 0.1);
+    animation: slideInDown 0.4s ease;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.quick-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.quick-card-avatar {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(255, 107, 0, 0.2);
+}
+
+.quick-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.quick-card-info h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+}
+
+.quick-card-info p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-family: 'Courier New', monospace;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quick-card-close {
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.quick-card-close:hover {
+    background: white;
+    color: var(--danger-color);
+    transform: rotate(90deg);
+}
+
+.quick-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.quick-history {
+    background: rgba(255, 255, 255, 0.6);
+    padding: 10px 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.quick-history-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.quick-history-value {
+    color: var(--text-primary);
+    font-family: 'Courier New', monospace;
+}
+
+.quick-history-avg {
+    margin-left: auto;
+    font-weight: 700;
+    color: var(--primary-color);
+    background: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-sm {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.btn-secondary.btn-sm {
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--text-primary);
+}
+
+.btn-secondary.btn-sm:hover {
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary.btn-sm {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary.btn-sm:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+}
+
+/* Hidden state */
+.quick-transfer-card.hidden {
+    display: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .quick-transfer-card {
+        padding: 14px;
+    }
+
+    .quick-card-info h4 {
+        font-size: 15px;
+    }
+
+    .quick-card-info p {
+        font-size: 11px;
+    }
+
+    .quick-history {
+        font-size: 12px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .quick-history-avg {
+        margin-left: 0;
+        text-align: center;
+    }
+
+    .quick-actions {
+        flex-direction: row;
+    }
+
+    .btn-sm {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+}
+
+/* Gaze Hover Effect */
+.btn-sm.gaze-hover,
+.quick-card-close.gaze-hover {
+    outline: 3px solid var(--primary-color);
+    outline-offset: 2px;
+    transform: scale(1.05);
 }
 

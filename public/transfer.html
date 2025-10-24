@@ -44,44 +44,43 @@
                         </select>
                     </div>
 
-                    <!-- Transfer Type -->
-                    <div class="form-section">
-                        <label class="form-label">Transfer Tipi</label>
-                        <div class="transfer-type-tabs">
-                            <button type="button" class="tab-btn active" data-type="iban" onclick="selectTransferType('iban')">
-                                IBAN ile
+                    <!-- Quick Transfer Card - KOMPAKT -->
+                    <div id="quickTransferCard" class="quick-transfer-card">
+                        <div class="quick-card-header">
+                            <div class="quick-card-avatar">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="#FF6B00">
+                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                </svg>
+                            </div>
+                            <div class="quick-card-info">
+                                <h4>Hızlı Transfer: Arda YILMAZ</h4>
+                                <p>TR12 3456 7890 1234 5678 9012 34</p>
+                            </div>
+                            <button class="quick-card-close" onclick="closeQuickTransfer()" title="Kapat">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                </svg>
                             </button>
-                            <button type="button" class="tab-btn" data-type="phone" onclick="selectTransferType('phone')">
-                                Telefon ile
-                            </button>
-                            <button type="button" class="tab-btn" data-type="saved" onclick="selectTransferType('saved')">
-                                Kayıtlı Alıcı
-                            </button>
+                        </div>
+                        <div class="quick-card-body">
+                            <div class="quick-history">
+                                <span class="quick-history-label">Son 3 ay:</span>
+                                <span class="quick-history-value">₺1,250 • ₺2,500 • ₺1,850</span>
+                                <span class="quick-history-avg">Ort: ₺1,866.67</span>
+                            </div>
+                            <div class="quick-actions">
+                                <button class="btn btn-secondary btn-sm" onclick="closeQuickTransfer()">İptal</button>
+                                <button class="btn btn-primary btn-sm" onclick="confirmQuickTransfer()">Gönder</button>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Recipient Information -->
-                    <div class="form-section" id="ibanSection">
+                    <div class="form-section">
                         <label class="form-label" for="recipientIban">Alıcı IBAN</label>
                         <input type="text" class="form-input" id="recipientIban" 
                                placeholder="TR00 0000 0000 0000 0000 0000 00" 
                                maxlength="32" required>
-                    </div>
-
-                    <div class="form-section" id="phoneSection" style="display: none;">
-                        <label class="form-label" for="recipientPhone">Alıcı Telefon Numarası</label>
-                        <input type="tel" class="form-input" id="recipientPhone" 
-                               placeholder="5XX XXX XX XX">
-                    </div>
-
-                    <div class="form-section" id="savedSection" style="display: none;">
-                        <label class="form-label" for="savedRecipient">Kayıtlı Alıcı Seçin</label>
-                        <select class="form-select" id="savedRecipient">
-                            <option value="">Seçiniz</option>
-                            <option value="1">Mehmet Demir - TR12 3456 7890 1234 5678 9012 34</option>
-                            <option value="2">Ayşe Yıldız - TR98 7654 3210 9876 5432 1098 76</option>
-                            <option value="3">Fatma Kaya - TR45 6789 0123 4567 8901 2345 67</option>
-                        </select>
                     </div>
 
                     <div class="form-section">
@@ -124,10 +123,12 @@
                         </div>
                     </div>
 
-                    <!-- Submit Button -->
-                    <button type="submit" class="btn btn-primary btn-large" id="submitBtn">
-                        Transferi Onayla
-                    </button>
+                    <!-- Submit Button - STICKY AT BOTTOM -->
+                    <div class="sticky-button-container">
+                        <button type="submit" class="btn btn-primary btn-large sticky-submit-btn" id="submitBtn">
+                            Transferi Onayla
+                        </button>
+                    </div>
 
                     <!-- Gaze Confirmation Section (hidden initially) -->
                     <div id="gazeConfirmation" class="gaze-confirmation" style="display: none;">
